@@ -1,4 +1,3 @@
-pip install -U pytest
 
 
 from question1 import get_city_weather
