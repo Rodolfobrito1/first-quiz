@@ -20,6 +20,8 @@ def get_city_temperature(city):
       return 17
    if city == "San Francisco":
       return 16
+   else:
+      return "Temperatura no disponible para esta ciudad"
 
 def get_city_weather(city):
 
@@ -29,6 +31,8 @@ def get_city_weather(city):
      sky_condition = "cloudy"
   elif city == "New York":
      sky_condition = "rainy"
+  else:
+     sky_condition = "sunny"
 
   temperature = get_city_temperature(city)
 
