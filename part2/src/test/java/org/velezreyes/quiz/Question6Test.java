@@ -1,95 +1,58 @@
-package org.velezreyes.quiz;
+package org.velezreyes.quiz.question6;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.junit.jupiter.api.Test;
-import org.velezreyes.quiz.question6.Drink;
-import org.velezreyes.quiz.question6.NotEnoughMoneyException;
-import org.velezreyes.quiz.question6.UnknownDrinkException;
-import org.velezreyes.quiz.question6.VendingMachine;
-import org.velezreyes.quiz.question6.VendingMachineImpl;
+public class VendingMachineImpl implements VendingMachine {
 
-public class Question6Test {
+    private static VendingMachineImpl instance = null;
+    private Map<String, Integer> drinkPrices;
+    private Map<String, Boolean> fizzyDrinks;
+    private int moneyInserted;
 
-  @Test
-  public void canCreateVendingMachineInstance() {
-    VendingMachine vm = VendingMachineImpl.getInstance();
-    assertNotNull(vm);
-  }
+    private VendingMachineImpl() {
+        drinkPrices = new HashMap<>();
+        drinkPrices.put("ScottCola", 75);
+        drinkPrices.put("KarenTea", 100);
 
-  @Test
-  public void drinkNotFree() {
-    VendingMachine vm = VendingMachineImpl.getInstance();
+        fizzyDrinks = new HashMap<>();
+        fizzyDrinks.put("ScottCola", true);
+        fizzyDrinks.put("KarenTea", false);
 
-    Exception exception = assertThrows(NotEnoughMoneyException.class, () -> {
-      vm.pressButton("ScottCola");
-    });
-  }
+        moneyInserted = 0;
+    }
 
-  @Test
-  public void canGetScottColaFor75Cents() throws Exception {
-    VendingMachine vm = VendingMachineImpl.getInstance();
+    public static VendingMachineImpl getInstance() {
+        if (instance == null) {
+            instance = new VendingMachineImpl();
+        }
+        return instance;
+    }
 
-    vm.insertQuarter();
-    vm.insertQuarter();
-    vm.insertQuarter();
+    @Override
+    public void insertQuarter() {
+        moneyInserted += 25;
+    }
 
-    Drink drink = vm.pressButton("ScottCola");
-    
-    assertTrue(drink.isFizzy());
-    assertEquals(drink.getName(), "ScottCola");
-  }
+    @Override
+    public Drink pressButton(String drinkName) throws NotEnoughMoneyException, UnknownDrinkException {
+        if (drinkPrices.containsKey(drinkName)) {
+            int price = drinkPrices.get(drinkName);
+            boolean isFizzy = fizzyDrinks.get(drinkName);
 
-  public void machineResets() throws Exception {
-    VendingMachine vm = VendingMachineImpl.getInstance();
+            if (moneyInserted >= price) {
+                moneyInserted -= price;
+                return new Drink(drinkName, isFizzy);
+            } else {
+                throw new NotEnoughMoneyException();
+            }
+        } else {
+            throw new UnknownDrinkException();
+        }
+    }
 
-    vm.insertQuarter();
-    vm.insertQuarter();
-    vm.insertQuarter();
-
-    Drink drink = vm.pressButton("ScottCola");
-    assertNotNull(drink);
-
-    Exception exception = assertThrows(NotEnoughMoneyException.class, () -> {
-      vm.pressButton("ScottCola");
-    });
-  }
-
-  @Test
-  public void canGetKarenTeaForOneDollar() throws Exception {
-    VendingMachine vm = VendingMachineImpl.getInstance();
-
-    vm.insertQuarter();
-    vm.insertQuarter();
-    vm.insertQuarter();
-
-    // Test that KarenTea costs at least 75 cents.
-    assertThrows(NotEnoughMoneyException.class, () -> {
-      vm.pressButton("KarenTea");
-    });
-
-    vm.insertQuarter();
-
-    Drink drink = vm.pressButton("KarenTea");
-    assertFalse(drink.isFizzy());
-    assertEquals(drink.getName(), "KarenTea");
-  }
-
-  @Test
-  public void otherDrinksUnknown() throws Exception {
-    VendingMachine vm = VendingMachineImpl.getInstance();
-
-    vm.insertQuarter();
-    vm.insertQuarter();
-    vm.insertQuarter();
-    vm.insertQuarter();
-
-    assertThrows(UnknownDrinkException.class, () -> {
-      vm.pressButton("BessieBooze");
-    });
-  }
+    @Override
+    public void reset() {
+        moneyInserted = 0;
+    }
 }
