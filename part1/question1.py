@@ -20,6 +20,8 @@ def get_city_temperature(city):
       return 17
    if city == "San Francisco":
       return 16
+   if city == "New York":
+      return 14
    else:
       return "Temperatura no disponible para esta ciudad"
 
